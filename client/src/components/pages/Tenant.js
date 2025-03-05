@@ -1,16 +1,16 @@
 import React, { Component, Fragment } from "react";
 import Navbar from "../partials/Navbar";
 import Sidebar from "../partials/Sidebar";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faList} from "@fortawesome/free-solid-svg-icons/faList";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faList } from "@fortawesome/free-solid-svg-icons/faList";
 import ReactDatatable from '@ashvin27/react-datatable';
 import PropTypes from "prop-types";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
 import axios from "axios";
-import {faPlus} from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import TenantUpdateModal from "../partials/TenantUpdateModal";
 import TenantAddModal from "../partials/TenantAddModal";
-import { toast, ToastContainer} from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import DefaultLayout from "../layout/DefaultLayout";
 import Cookies from 'js-cookie';
 
@@ -90,8 +90,8 @@ class Tenants extends Component {
                         return (
                             <Fragment>
                                 <button
-                                    data-toggle="modal"
-                                    data-target="#update-tenant-modal"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#update-tenant-modal"
                                     className="btn btn-primary btn-sm"
                                     onClick={() => this.editRecord(record)}
                                     style={{marginRight: '5px'}}>
@@ -108,7 +108,6 @@ class Tenants extends Component {
                 }
             ];
         }
-
         else {
             this.columns = [
                 {
@@ -232,28 +231,34 @@ class Tenants extends Component {
             .then(res => {
                 let recordData = res.data.map((data, i) => {
                     return {
-                        id: data.id, tenantId: data.tenantId, tenantName: data.tenantName, flatNumber: data.flats.flatNumber, phoneNumber: data.phoneNumber, numberOfPeople: data.numberOfPeople, profession: data.profession, date: data.date
+                        id: data.id,
+                        tenantId: data.tenantId,
+                        tenantName: data.tenantName,
+                        flatNumber: data.flats.flatNumber,
+                        phoneNumber: data.phoneNumber,
+                        numberOfPeople: data.numberOfPeople,
+                        profession: data.profession,
+                        date: data.date
                     }
-                })
-                this.setState({ records: recordData})
+                });
+                this.setState({ records: recordData });
             })
-            .catch()
+            .catch();
     }
 
     editRecord(record) {
-        debugger;
-        this.setState({ currentRecord: record});
+        this.setState({ currentRecord: record });
     }
 
     deleteRecord(record) {
         console.log("Record to delete", record);
         axios
-            .post("/api/tenant-delete", {_id: record.id})
+            .post("/api/tenant-delete", { _id: record.id })
             .then(res => {
                 if (res.status === 200) {
                    toast(res.data.message, {
                        position: toast.POSITION.TOP_CENTER,
-                   })
+                   });
                 }
             })
             .catch();
@@ -272,19 +277,27 @@ class Tenants extends Component {
                     metadata={TenantMetadata}
                 />
                 <div id="page-content-wrapper">
-                        <div className="container-fluid">
-                            <button className="btn btn-link mt-3" id="menu-toggle"><FontAwesomeIcon icon={faList}/></button>
-                            {(localStorage.userPermission === "Admin") && <button className="btn btn-outline-primary float-right mt-3 mr-2" data-toggle="modal" data-target="#add-tenant-modal"><FontAwesomeIcon icon={faPlus}/> Add Tenant</button>}
-                            <h1 className="mt-2 text-primary">Tenant List</h1>
-                            <ReactDatatable
-                                config={this.config}
-                                records={this.state.records}
-                                columns={this.columns}
-                                onPageChange={this.pageChange.bind(this)}
-                            />
-                        </div>
+                    <div className="container-fluid">
+                        <button className="btn btn-link mt-3" id="menu-toggle">
+                            <FontAwesomeIcon icon={faList} />
+                        </button>
+                        {(localStorage.userPermission === "Admin") &&
+                            <button className="btn btn-outline-primary float-right mt-3 mr-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#add-tenant-modal">
+                                <FontAwesomeIcon icon={faPlus} /> Add Tenant
+                            </button>
+                        }
+                        <h1 className="mt-2 text-primary">Tenant List</h1>
+                        <ReactDatatable
+                            config={this.config}
+                            records={this.state.records}
+                            columns={this.columns}
+                            onPageChange={this.pageChange.bind(this)}
+                        />
+                    </div>
                 </div>
-                <TenantAddModal/>
+                <TenantAddModal />
            </DefaultLayout>
         );
     }

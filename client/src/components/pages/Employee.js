@@ -1,16 +1,16 @@
 import React, { Component, Fragment } from "react";
 import Navbar from "../partials/Navbar";
 import Sidebar from "../partials/Sidebar";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faList} from "@fortawesome/free-solid-svg-icons/faList";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faList } from "@fortawesome/free-solid-svg-icons/faList";
 import ReactDatatable from '@ashvin27/react-datatable';
 import PropTypes from "prop-types";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
 import axios from "axios";
-import {faPlus} from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import EmployeeAddModal from "../partials/EmployeeAddModal";
 import EmployeeUpdateModal from "../partials/EmployeeUpdateModal";
-import { toast, ToastContainer} from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import DefaultLayout from "../layout/DefaultLayout";
 
 import employeeMetadata from "./metadata/employeeMetadata";
@@ -20,7 +20,7 @@ class Employee extends Component {
     constructor(props) {
         super(props);
 
-        if(localStorage.userPermission === "Admin") {
+        if (localStorage.userPermission === "Admin") {
             this.columns = [
                 {
                     key: "_id",
@@ -75,11 +75,11 @@ class Employee extends Component {
                         return (
                             <Fragment>
                                 <button
-                                    data-toggle="modal"
-                                    data-target="#update-employee-modal"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#update-employee-modal"
                                     className="btn btn-primary btn-sm"
                                     onClick={() => this.editRecord(record)}
-                                    style={{marginRight: '5px'}}>
+                                    style={{ marginRight: '5px' }}>
                                     <i className="fa fa-edit"></i>
                                 </button>
                                 <button
@@ -92,8 +92,7 @@ class Employee extends Component {
                     }
                 }
             ];
-        }
-        else {
+        } else {
             this.columns = [
                 {
                     key: "_id",
@@ -142,7 +141,7 @@ class Employee extends Component {
 
         this.config = {
             page_size: 10,
-            length_menu: [ 10, 20, 50 ],
+            length_menu: [10, 20, 50],
             filename: "Employees",
             no_data_text: 'No Employee found!',
             button: {
@@ -168,10 +167,7 @@ class Employee extends Component {
         };
 
         this.state = {
-            records: []
-        };
-
-        this.state = {
+            records: [],
             currentRecord: {
                 id: '',
                 employeeId: '',
@@ -185,35 +181,34 @@ class Employee extends Component {
     }
 
     componentDidMount() {
-        this.getData()
+        this.getData();
     };
 
     componentWillReceiveProps(nextProps) {
-        this.getData()
+        this.getData();
     }
 
     getData() {
         axios
             .post("/api/employee-data")
             .then(res => {
-                this.setState({ records: res.data})
+                this.setState({ records: res.data });
             })
-            .catch()
+            .catch();
     }
 
     editRecord(record) {
-        debugger;
-        this.setState({ currentRecord: record});
+        this.setState({ currentRecord: record });
     }
 
     deleteRecord(record) {
         axios
-            .post("/api/employee-delete", {_id: record._id})
+            .post("/api/employee-delete", { _id: record._id })
             .then(res => {
                 if (res.status === 200) {
-                   toast(res.data.message, {
-                       position: toast.POSITION.TOP_CENTER,
-                   })
+                    toast(res.data.message, {
+                        position: toast.POSITION.TOP_CENTER,
+                    });
                 }
             })
             .catch();
@@ -226,26 +221,34 @@ class Employee extends Component {
 
     render() {
         return (
-           <DefaultLayout>
-                <EmployeeAddModal/>
+            <DefaultLayout>
+                <EmployeeAddModal />
                 <EmployeeUpdateModal 
                     record={this.state.currentRecord}
                     metadata={employeeMetadata}
                 />
                 <div id="page-content-wrapper">
-                        <div className="container-fluid">
-                            <button className="btn btn-link mt-3" id="menu-toggle"><FontAwesomeIcon icon={faList}/></button>
-                            {(localStorage.userPermission === "Admin") && <button className="btn btn-outline-primary float-right mt-3 mr-2" data-toggle="modal" data-target="#add-employee-modal"><FontAwesomeIcon icon={faPlus}/> Add Employee</button>}
-                            <h1 className="mt-2 text-primary">Employee List</h1>
-                            <ReactDatatable
-                                config={this.config}
-                                records={this.state.records}
-                                columns={this.columns}
-                                onPageChange={this.pageChange.bind(this)}
-                            />
-                        </div>
+                    <div className="container-fluid">
+                        <button className="btn btn-link mt-3" id="menu-toggle">
+                            <FontAwesomeIcon icon={faList} />
+                        </button>
+                        {(localStorage.userPermission === "Admin") &&
+                            <button className="btn btn-outline-primary float-right mt-3 mr-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#add-employee-modal">
+                                <FontAwesomeIcon icon={faPlus} /> Add Employee
+                            </button>
+                        }
+                        <h1 className="mt-2 text-primary">Employee List</h1>
+                        <ReactDatatable
+                            config={this.config}
+                            records={this.state.records}
+                            columns={this.columns}
+                            onPageChange={this.pageChange.bind(this)}
+                        />
+                    </div>
                 </div>
-           </DefaultLayout>
+            </DefaultLayout>
         );
     }
 

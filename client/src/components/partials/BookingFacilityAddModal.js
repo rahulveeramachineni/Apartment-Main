@@ -91,9 +91,10 @@ class BookingFacilityAddModal extends React.Component {
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h4 className="modal-title">Book Facility</h4>
-                                <button type="button" className="close" data-dismiss="modal">&times;</button>
+                                {/* <button type="button" className="close" data-dismiss="modal">&times;</button> */}
                             </div>
                             <div className="modal-body">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <form noValidate onSubmit={this.onBookingFacilityAdd} id="add-booking-facility">
                                     <div className="row mt-2">
                                         <div className="col-md-3">
@@ -141,7 +142,8 @@ class BookingFacilityAddModal extends React.Component {
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                
                                 <button
                                     form="add-booking-facility"
                                     type="submit"

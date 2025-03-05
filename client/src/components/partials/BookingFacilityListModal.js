@@ -124,11 +124,13 @@ class BookingFacilityListModal extends React.Component {
         return (
             <div>
                 <div className="modal fade" id="view-booking-facility-modal" data-reset="true">
+                    
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h4 className="modal-title">List of Booked Facility</h4>
-                                <button type="button" className="close" data-dismiss="modal">&times;</button>
+                                
+                                {/* <button type="button" className="close" data-dismiss="modal">&times;</button> */}
                             </div>
                             <div className="modal-body">
                                 <ReactDatatable
@@ -136,8 +138,11 @@ class BookingFacilityListModal extends React.Component {
                                     records={this.state.records}
                                     columns={this.columns}
                                     onPageChange={this.pageChange.bind(this)}
+
                                 />
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </div>
+                            
                         </div>
                     </div>
                 </div>

@@ -94,7 +94,7 @@ class TenantAddModal extends React.Component {
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h4 className="modal-title">Add Tenant Data</h4>
-                                <button type="button" className="close" data-dismiss="modal">&times;</button>
+                                
                             </div>
                             <div className="modal-body">
                                 <form noValidate onSubmit={this.onTenantAdd} id="add-tenant">
@@ -199,7 +199,10 @@ class TenantAddModal extends React.Component {
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+  Close
+</button>
+
                                 <button
                                     form="add-tenant"
                                     type="submit"
