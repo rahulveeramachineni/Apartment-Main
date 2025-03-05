@@ -32,33 +32,34 @@ class UserAddModal extends React.Component {
 
     onUserAdd = (e) => {
         e.preventDefault();
-
+    
         const { name, email, password, password2, userPermission } = this.state;
-
+    
         if (password !== password2) {
             toast.error("Passwords do not match!");
             return;
         }
-
+    
         if (!userPermission) {
             toast.error("Please select a user permission.");
             return;
         }
-
-        const newUser = { name, email, password, userPermission };
-
+    
+        // Include password2 in the payload
+        const newUser = { name, email, password, password2, userPermission };
+    
         this.props.addUser(newUser, this.props.history);
-
+    
         // Show success message
         toast.success("User added successfully!");
-
+    
         // Close modal properly
         const modalElement = document.getElementById("add-user-modal");
         const modalInstance = Modal.getInstance(modalElement);
         if (modalInstance) {
             modalInstance.hide();
         }
-
+    
         // Clear form after submission
         this.setState({
             name: "",
@@ -67,7 +68,7 @@ class UserAddModal extends React.Component {
             password2: "",
             userPermission: "",
         });
-    };
+    };    
 
     render() {
         const options = [

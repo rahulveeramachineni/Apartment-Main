@@ -3,14 +3,15 @@ import Navbar from "../partials/Navbar";
 import Sidebar from "../partials/Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList, faPlus } from "@fortawesome/free-solid-svg-icons";
-import ReactDatatable from '@ashvin27/react-datatable';
+import ReactDatatable from "@ashvin27/react-datatable";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import { Modal } from "bootstrap";
+import DefaultLayout from "../layout/DefaultLayout";
 import FlatUpdateModal from "../partials/FlatUpdateModal";
 import FlatAddModal from "../partials/FlatAddModal";
-import { toast, ToastContainer } from "react-toastify";
-import DefaultLayout from "../layout/DefaultLayout";
 import flatMetadata from "./metadata/flatMetaData";
 
 class Flats extends Component {
@@ -20,17 +21,19 @@ class Flats extends Component {
         this.state = {
             records: [],
             currentRecord: {
-                _id: '',
-                flatNumber: '',
-                flatOwnerName: '',
-                flatOwnerNumber: '',
-                flatOwnerProfession: '',
-            }
+                _id: "",
+                flatNumber: "",
+                flatOwnerName: "",
+                flatOwnerNumber: "",
+                flatOwnerProfession: "",
+            },
         };
 
         this.getData = this.getData.bind(this);
         this.editRecord = this.editRecord.bind(this);
         this.deleteRecord = this.deleteRecord.bind(this);
+        this.showAddFlatModal = this.showAddFlatModal.bind(this);
+        this.hideAddFlatModal = this.hideAddFlatModal.bind(this);
 
         this.columns = [
             { key: "_id", text: "Id", className: "id", align: "left", sortable: true },
@@ -38,7 +41,7 @@ class Flats extends Component {
             { key: "flatOwnerName", text: "Owner Name", className: "flatOwnerName", align: "left", sortable: true },
             { key: "flatOwnerNumber", text: "Owner Number", className: "flatOwnerNumber", align: "left", sortable: true },
             { key: "flatOwnerProfession", text: "Profession", className: "flatOwnerProfession", align: "left", sortable: true },
-            { key: "date", text: "Date", className: "date", align: "left", sortable: true }
+            { key: "date", text: "Date", className: "date", align: "left", sortable: true },
         ];
 
         if (localStorage.getItem("userPermission") === "Admin") {
@@ -49,23 +52,19 @@ class Flats extends Component {
                 width: 100,
                 align: "left",
                 sortable: false,
-                cell: record => (
+                cell: (record) => (
                     <Fragment>
                         <button
-                            data-toggle="modal"
-                            data-target="#update-flat-modal"
                             className="btn btn-primary btn-sm"
                             onClick={() => this.editRecord(record)}
-                            style={{ marginRight: '5px' }}>
+                            style={{ marginRight: "5px" }}>
                             <i className="fa fa-edit"></i>
                         </button>
-                        <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => this.deleteRecord(record)}>
+                        <button className="btn btn-danger btn-sm" onClick={() => this.deleteRecord(record)}>
                             <i className="fa fa-trash"></i>
                         </button>
                     </Fragment>
-                )
+                ),
             });
         }
 
@@ -73,13 +72,13 @@ class Flats extends Component {
             page_size: 10,
             length_menu: [10, 20, 50],
             filename: "Flats",
-            no_data_text: 'No flats found!',
+            no_data_text: "No flats found!",
             button: { excel: true, print: true, csv: true },
             language: {
                 length_menu: "Show _MENU_ results per page",
                 filter: "Search records...",
                 info: "Showing _START_ to _END_ of _TOTAL_ records",
-                pagination: { first: "First", previous: "Previous", next: "Next", last: "Last" }
+                pagination: { first: "First", previous: "Previous", next: "Next", last: "Last" },
             },
             show_length_menu: true,
             show_filter: true,
@@ -98,7 +97,7 @@ class Flats extends Component {
         if (!token || token === "undefined") {
             console.warn("Authentication token not found. Redirecting to login.");
             toast.error("Session expired. Please log in again.");
-            window.location.href = "/login"; // Redirects user to login page
+            window.location.href = "/login";
         }
     }
 
@@ -122,7 +121,7 @@ class Flats extends Component {
 
             if (res.status === 200) {
                 toast.success(res.data.message, { position: toast.POSITION.TOP_CENTER });
-                this.getData(); // Refresh data
+                this.getData();
             }
         } catch (error) {
             console.error("Delete failed:", error);
@@ -132,40 +131,46 @@ class Flats extends Component {
 
     getAuthHeaders() {
         const token = localStorage.getItem("jwtToken");
+        return token ? { headers: { Authorization: token } } : {};
+    }
 
-        if (!token || token === "undefined") {
-            console.warn("Authentication token not found.");
-            return {};
+    showAddFlatModal() {
+        const modalElement = document.getElementById("add-flat-modal");
+        if (modalElement) {
+            const modalInstance = new Modal(modalElement);
+            modalInstance.show();
         }
+    }
 
-        return { headers: { Authorization: token } }; // Token already includes "Bearer"
+    hideAddFlatModal() {
+        const modalElement = document.getElementById("add-flat-modal");
+        if (modalElement) {
+            const modalInstance = Modal.getInstance(modalElement);
+            if (modalInstance) modalInstance.hide();
+        }
     }
 
     render() {
         return (
             <DefaultLayout>
                 <ToastContainer />
-                <FlatAddModal />
+                <FlatAddModal hideModal={this.hideAddFlatModal} />
                 <FlatUpdateModal record={this.state.currentRecord} metadata={flatMetadata} />
+
                 <div id="page-content-wrapper">
                     <div className="container-fluid">
                         <button className="btn btn-link mt-3" id="menu-toggle">
                             <FontAwesomeIcon icon={faList} />
                         </button>
+
                         {localStorage.getItem("userPermission") === "Admin" && (
-                            <button
-                                className="btn btn-outline-primary float-right mt-3 mr-2"
-                                data-toggle="modal"
-                                data-target="#add-flat-modal">
+                            <button className="btn btn-outline-primary float-right mt-3 mr-2" onClick={this.showAddFlatModal}>
                                 <FontAwesomeIcon icon={faPlus} /> Add Flat
                             </button>
                         )}
+
                         <h1 className="mt-2 text-primary">Flat List</h1>
-                        <ReactDatatable
-                            config={this.config}
-                            records={this.state.records}
-                            columns={this.columns}
-                        />
+                        <ReactDatatable config={this.config} records={this.state.records} columns={this.columns} />
                     </div>
                 </div>
             </DefaultLayout>
@@ -177,9 +182,9 @@ Flats.propTypes = {
     auth: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     auth: state.auth,
-    records: state.records
+    records: state.records,
 });
 
 export default connect(mapStateToProps)(Flats);

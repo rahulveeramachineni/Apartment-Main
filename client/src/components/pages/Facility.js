@@ -1,6 +1,4 @@
 import React, { Component, Fragment } from "react";
-import Navbar from "../partials/Navbar";
-import Sidebar from "../partials/Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList, faGamepad, faPlus } from "@fortawesome/free-solid-svg-icons";
 import ReactDatatable from "@ashvin27/react-datatable";
@@ -14,8 +12,11 @@ import FacilityAddModal from "../partials/FacilityAddModal";
 import FacilityUpdateModal from "../partials/FacilityUpdateModal";
 import BookingFacilityListModal from "../partials/BookingFacilityListModal";
 import BookingFacilityAddModal from "../partials/BookingFacilityAddModal";
+import { Modal } from "bootstrap";  // Use Bootstrap 5 modal API
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min";
 
-const BASE_URL = process.env.REACT_APP_BACKEND_URL; // Taking from .env
+const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 class Facility extends Component {
     constructor(props) {
@@ -42,8 +43,6 @@ class Facility extends Component {
                 cell: record => (
                     <Fragment>
                         <button
-                            data-toggle="modal"
-                            data-target="#update-facility-modal"
                             className="btn btn-primary btn-sm"
                             onClick={() => this.editRecord(record)}
                             style={{ marginRight: "5px" }}
@@ -119,7 +118,13 @@ class Facility extends Component {
     }
 
     editRecord(record) {
-        this.setState({ currentRecord: record });
+        this.setState({ currentRecord: record }, () => {
+            const modalElement = document.getElementById("update-facility-modal");
+            if (modalElement) {
+                const modalInstance = Modal.getInstance(modalElement) || new Modal(modalElement);
+                modalInstance.show();
+            }
+        });
     }
 
     async deleteRecord(record) {
@@ -144,7 +149,7 @@ class Facility extends Component {
             return {};
         }
 
-        return { headers: { Authorization: token } }; // Token already has "Bearer "
+        return { headers: { Authorization: token } };
     }
 
     pageChange(pageData) {
@@ -155,28 +160,58 @@ class Facility extends Component {
         return (
             <DefaultLayout>
                 <ToastContainer />
-                <BookingFacilityAddModal />
-                <BookingFacilityListModal />
-                <FacilityAddModal />
-                <FacilityUpdateModal record={this.state.currentRecord} metadata={FacilityMetadata} />
+                {/* Replace jQuery modal calls with Bootstrap's Modal API */}
+                <BookingFacilityAddModal id="add-booking-facility-modal" />
+                <BookingFacilityListModal id="view-booking-facility-modal" />
+                <FacilityAddModal id="add-facility-modal" />
+                <FacilityUpdateModal id="update-facility-modal" record={this.state.currentRecord} metadata={FacilityMetadata} />
+
                 <div id="page-content-wrapper">
                     <div className="container-fluid">
                         <button className="btn btn-link mt-3" id="menu-toggle">
                             <FontAwesomeIcon icon={faList} />
                         </button>
                         {localStorage.userPermission === "Admin" && (
-                            <button className="btn btn-outline-primary float-right mt-3 mr-2" data-toggle="modal" data-target="#add-facility-modal">
+                            <button
+                                className="btn btn-outline-primary float-right mt-3 mr-2"
+                                onClick={() => {
+                                    const modalElement = document.getElementById("add-facility-modal");
+                                    if (modalElement) {
+                                        const modalInstance = Modal.getInstance(modalElement) || new Modal(modalElement);
+                                        modalInstance.show();
+                                    }
+                                }}
+                            >
                                 <FontAwesomeIcon icon={faPlus} /> Add Facility
                             </button>
                         )}
                         {localStorage.userPermission === "Admin" && (
-                            <button className="btn btn-outline-primary float-right mt-3 mr-2" data-toggle="modal" data-target="#view-booking-facility-modal">
+                            <button
+                                className="btn btn-outline-primary float-right mt-3 mr-2"
+                                onClick={() => {
+                                    const modalElement = document.getElementById("view-booking-facility-modal");
+                                    if (modalElement) {
+                                        const modalInstance = Modal.getInstance(modalElement) || new Modal(modalElement);
+                                        modalInstance.show();
+                                    }
+                                }}
+                            >
                                 <FontAwesomeIcon icon={faGamepad} /> View Booking Facility
                             </button>
                         )}
-                        <button className="btn btn-outline-primary float-right mt-3 mr-2" data-toggle="modal" data-target="#add-booking-facility-modal">
+                        <button
+                            className="btn btn-outline-primary float-right mt-3 mr-2"
+                            onClick={() => {
+                                const modalElement = document.getElementById("add-booking-facility-modal");
+                                if (modalElement) {
+                                    const modalInstance = Modal.getInstance(modalElement) || new Modal(modalElement);
+                                    modalInstance.show();
+                                }
+                            }}
+                        >
                             <FontAwesomeIcon icon={faPlus} /> Book Facility
                         </button>
+
                         <h1 className="mt-2 text-primary">Facility List</h1>
                         <ReactDatatable
                             config={this.config}

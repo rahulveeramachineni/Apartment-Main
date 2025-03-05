@@ -1,8 +1,6 @@
 import React, { Component, Fragment } from "react";
-import Navbar from "../partials/Navbar";
-import Sidebar from "../partials/Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faList, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import ReactDatatable from "@ashvin27/react-datatable";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
@@ -13,6 +11,8 @@ import { toast, ToastContainer } from "react-toastify";
 import DefaultLayout from "../layout/DefaultLayout";
 import UserMetadata from "./metadata/userMetadata";
 import { Modal } from "bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 class Users extends Component {
     constructor(props) {
@@ -31,22 +31,16 @@ class Users extends Component {
                 width: 100,
                 align: "left",
                 sortable: false,
-                cell: (record) => {
-                    return (
-                        <Fragment>
-                            <button
-                                className="btn btn-primary btn-sm"
-                                onClick={() => this.editRecord(record)}
-                                style={{ marginRight: "5px" }}
-                            >
-                                <i className="fa fa-edit"></i>
-                            </button>
-                            <button className="btn btn-danger btn-sm" onClick={() => this.deleteRecord(record)}>
-                                <i className="fa fa-trash"></i>
-                            </button>
-                        </Fragment>
-                    );
-                },
+                cell: (record) => (
+                    <Fragment>
+                        <button className="btn btn-primary btn-sm" onClick={() => this.openEditModal(record)}>
+                            <i className="fa fa-edit"></i>
+                        </button>
+                        <button className="btn btn-danger btn-sm" onClick={() => this.deleteRecord(record)}>
+                            <i className="fa fa-trash"></i>
+                        </button>
+                    </Fragment>
+                ),
             },
         ];
 
@@ -57,8 +51,8 @@ class Users extends Component {
             no_data_text: "No user found!",
             button: { excel: true, print: true, csv: true },
             language: {
-                length_menu: "Show _MENU_ result per page",
-                filter: "Filter in records...",
+                length_menu: "Show _MENU_ results per page",
+                filter: "Filter records...",
                 info: "Showing _START_ to _END_ of _TOTAL_ records",
                 pagination: { first: "First", previous: "Previous", next: "Next", last: "Last" },
             },
@@ -70,14 +64,7 @@ class Users extends Component {
 
         this.state = {
             records: [],
-            currentRecord: {
-                id: "",
-                name: "",
-                email: "",
-                password: "",
-                password2: "",
-                userPermission: "",
-            },
+            currentRecord: {},
         };
     }
 
@@ -85,17 +72,14 @@ class Users extends Component {
         this.getData();
     }
 
-    componentDidUpdate(prevProps) {
-        if (this.props.records !== prevProps.records) {
-            this.getData();
-        }
-    }
-
     getData = () => {
         const token = localStorage.getItem("token");
+        console.log(" ========= ");
+        console.log(token);
         axios
             .post("/api/user-data", {}, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => {
+                console.log("Updated user list:", res.data);
                 this.setState({ records: res.data });
             })
             .catch((error) => {
@@ -104,13 +88,26 @@ class Users extends Component {
             });
     };
 
-    editRecord = (record) => {
-        this.setState({ currentRecord: record });
+    openEditModal = (record) => {
+        this.setState({ currentRecord: record }, () => {
+            const modalElement = document.getElementById("update-user-modal");
+            if (modalElement) {
+                const modalInstance = new Modal(modalElement);
+                modalInstance.show();
+            }
+        });
+    };
+
+    openAddUserModal = () => {
+        const modalElement = document.getElementById("add-user-modal");
+        if (modalElement) {
+            const modalInstance = new Modal(modalElement);
+            modalInstance.show();
+        }
     };
 
     deleteRecord = (record) => {
         const token = localStorage.getItem("token");
-
         axios
             .post("/api/user-delete", { _id: record._id }, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => {
@@ -125,18 +122,12 @@ class Users extends Component {
             });
     };
 
-    openAddUserModal = () => {
-        const modalElement = document.getElementById("add-user-modal");
-        const modalInstance = new Modal(modalElement);
-        modalInstance.show();
-    };
-
     render() {
         return (
             <DefaultLayout>
                 <ToastContainer />
-                <UserAddModal />
-                <UserUpdateModal record={this.state.currentRecord} metadata={UserMetadata} />
+                <UserAddModal onSuccess={this.getData} />
+                <UserUpdateModal record={this.state.currentRecord} metadata={UserMetadata} onSuccess={this.getData} />
                 <div id="page-content-wrapper">
                     <div className="container-fluid">
                         <button className="btn btn-outline-primary float-right mt-3 mr-2" onClick={this.openAddUserModal}>

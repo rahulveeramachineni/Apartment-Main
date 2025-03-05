@@ -1,155 +1,122 @@
-import React from 'react'
-import classnames from "classnames";
+import React from 'react';
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { updateUser } from "../../actions/userActions";
 import { withRouter } from "react-router-dom";
 import { toast } from 'react-toastify';
-import $ from 'jquery';
-
+import { Modal } from "bootstrap";
 import 'react-toastify/dist/ReactToastify.css';
 import FieldRenderer from '../common/FieldRenderer';
 
 class UserUpdateModal extends React.Component {
-
     constructor(props) {
         super(props);
-
-        const { id, name, email, userPermission  } = this.props.record || {};
-
-        const metadata = props.metadata; // metadat form 
-        const record = props.record || {}; // Actual Data from service
-        const initState = {};
-
-        metadata.map( field => {
-            const { name } = field;
-           
-            initState[name] = record[name];
-        });
-
-        console.log(initState);
-        console.log(props);
-
-        this.state = {
-           ...initState,
-            password: '',
-            errors: {},
-        };
-
+        const { record = {}, metadata = [] } = props;
+        const initState = metadata.reduce((acc, field) => {
+            acc[field.name] = record[field.name] || '';
+            return acc;
+        }, {});
+        this.state = { ...initState, password: '', errors: {}, modalInstance: null };
     }
 
-    
-    componentWillReceiveProps(nextProps) {
+    componentDidMount() {
+        this.setState({ modalInstance: new Modal(document.getElementById('update-user-modal')) });
+    }
 
-        if (nextProps.record) {
-            this.setState({
-                id: nextProps.record.id,
-                name: nextProps.record.name,
-                email: nextProps.record.email,
-                userPermission: nextProps.record.userPermission
-            })
+    componentDidUpdate(prevProps) {
+        if (prevProps.record !== this.props.record) {
+            this.setState({ ...this.props.record });
         }
-        if (nextProps.errors) {
-            this.setState({
-                errors: nextProps.errors
-            });
-        }
-        if (nextProps.auth !== undefined
-            && nextProps.auth.user !== undefined
-            && nextProps.auth.user.data !== undefined
-            && nextProps.auth.user.data.message !== undefined
-            && nextProps.auth.user.data.success) {
-            $('#update-user-modal').modal('hide');
-            toast(nextProps.auth.user.data.message, {
-                position: toast.POSITION.TOP_CENTER
-            });
+        if (prevProps.errors !== this.props.errors) {
+            this.setState({ errors: this.props.errors });
         }
     }
 
-    onChange = value => {
+    onChange = (value) => {
         this.setState({ ...value });
     };
 
-    onUserUpdate = e => {
+    onUserUpdate = (e) => {
         e.preventDefault();
-
-        const newUser = {
-            _id: this.state.id,
-            name: this.state.name,
-            email: this.state.email,
-            password: this.state.password,
-            userPermission: this.state.userPermission
-        };
-        this.props.updateUser(newUser);
+        const { id, name, email, password, userPermission } = this.state;
+        const updatedUser = { _id: id, name, email, password, userPermission };
+    
+        this.props.updateUser(updatedUser, (success) => {
+            if (success) {
+                toast.success("User updated successfully", { position: toast.POSITION.TOP_CENTER });
+    
+                // Close the modal properly
+                if (this.modalInstance) {
+                    this.modalInstance.hide();
+                }
+    
+                // Manually remove Bootstrap modal classes if needed
+                const modalElement = document.getElementById("update-user-modal");
+                if (modalElement) {
+                    modalElement.classList.remove("show");
+                    modalElement.style.display = "none";
+                    document.body.classList.remove("modal-open");
+                    const modalBackdrop = document.querySelector(".modal-backdrop");
+                    if (modalBackdrop) modalBackdrop.remove();
+                }
+            } else {
+                toast.error("Failed to update user. Please try again.");
+            }
+        });
     };
+    
+    
+    
 
     renderFields = () => {
+        return this.props.metadata.map((field) => (
+            <FieldRenderer
+                key={field.name}
+                changeHandler={this.onChange}
+                label={field.label}
+                value={this.state[field.name]}
+                error={this.state.errors[field.name]}
+                name={field.name}
+                type={field.type}
+                className={field.className || ''}
+                {...field}
+            />
+        ));
+    };
 
-        const { metadata=[] } = this.props;
-
-        return metadata.map(( field )=> {
-
-            const { label, name, type, className=''} = field;
-
-            return <FieldRenderer
-                        changeHandler={this.onChange}
-                        label={label}
-                        value={this.state[name]}
-                        error={this.state.errors[name]}
-                        name={name}
-                        type={type}
-                        className={className}
-                        {...field}
-                    />
-        });
-    }
     render() {
-
         return (
-            <div>
-                <div className="modal fade" id="update-user-modal">
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h4 className="modal-title">Update User</h4>
-                                <button type="button" className="close" data-dismiss="modal">&times;</button>
-                            </div>
-                            <div className="modal-body">
-                                <form noValidate onSubmit={this.onUserUpdate} id="update-user">
-        
-                                  { this.renderFields() }
-                                  
-                                </form>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button
-                                    form="update-user"
-                                    type="submit"
-                                    className="btn btn-primary">
-                                    Update User
-                                </button>
-                            </div>
+            <div className="modal fade" id="update-user-modal" tabIndex="-1">
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h4 className="modal-title">Update User</h4>
+                        </div>
+                        <div className="modal-body">
+                            <form noValidate onSubmit={this.onUserUpdate} id="update-user">
+                                {this.renderFields()}
+                            </form>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button form="update-user" type="submit" className="btn btn-primary">Update User</button>
                         </div>
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 }
 
 UserUpdateModal.propTypes = {
     updateUser: PropTypes.func.isRequired,
     auth: PropTypes.object.isRequired,
-    errors: PropTypes.object.isRequired
+    errors: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     auth: state.auth,
-    errors: state.errors
+    errors: state.errors,
 });
 
-export default connect(
-    mapStateToProps,
-    { updateUser }
-)(withRouter(UserUpdateModal));
+export default connect(mapStateToProps, { updateUser })(withRouter(UserUpdateModal));
