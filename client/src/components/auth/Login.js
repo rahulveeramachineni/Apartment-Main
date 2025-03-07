@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { loginUser } from "../../actions/authActions";
 import classnames from "classnames";
+import { Link } from "react-router-dom";  // ✅ Import Link for navigation
 
 class Login extends Component {
     constructor() {
@@ -18,7 +19,7 @@ class Login extends Component {
         if (this.props.auth.isAuthenticated) {
             this.props.history.push("/dashboard");
         }
-    };
+    }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.auth.isAuthenticated) {
@@ -26,9 +27,7 @@ class Login extends Component {
         }
 
         if (nextProps.errors) {
-            this.setState({
-                errors: nextProps.errors
-            });
+            this.setState({ errors: nextProps.errors });
         }
     }
 
@@ -50,42 +49,42 @@ class Login extends Component {
         return (
             <div className="container login-page">
                 <div className="row mt-5">
-                    <div className="col-md-4 mx-auto mt-5 card shadow-lg">
-                        <div className="card-body p-1">
+                    <div className="col-md-5 mx-auto mt-5 card shadow-lg p-4">
+                        <div className="card-body">
                             <h2 className="text-center text-primary mt-3">Login</h2>
                             <form noValidate onSubmit={this.onSubmit} className="white">
                                 <label htmlFor="email">Email</label>
                                 <input
                                     onChange={this.onChange}
                                     value={this.state.email}
-                                    error={errors.email}
                                     id="email"
                                     type="email"
-                                    className={classnames("form-control", {
-                                        invalid: errors.email
-                                    })}
+                                    className={classnames("form-control", { invalid: errors.email })}
                                 />
                                 <span className="text-danger">{errors.email}</span>
-                                <br/>
+                                <br />
                                 <label htmlFor="password">Password</label>
                                 <input
                                     onChange={this.onChange}
                                     value={this.state.password}
-                                    error={errors.password}
                                     id="password"
                                     type="password"
-                                    className={classnames("form-control", {
-                                        invalid: errors.password
-                                    })}
+                                    className={classnames("form-control", { invalid: errors.password })}
                                 />
                                 <span className="text-danger">{errors.password}</span>
-                                <p className="text-center pb-0 mt-2">
-                                    <button
-                                        type="submit"
-                                        className="btn btn-large btn-primary mt-2 px-5">
+
+                                
+                                <div className="d-flex align-items-center justify-content-between mt-4">
+                                    <button type="submit" className="btn btn-primary px-4">
                                         Login
                                     </button>
-                                </p>
+                                         <div className="d-flex align-items-center">
+                                        <span className="text-secondary mr-2">Don't have an account?</span>
+                                        <Link to="/register" className="btn btn-outline-primary">
+                                            Sign Up
+                                        </Link>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -100,10 +99,12 @@ Login.propTypes = {
     auth: PropTypes.object.isRequired,
     errors: PropTypes.object.isRequired
 };
+
 const mapStateToProps = state => ({
     auth: state.auth,
     errors: state.errors
 });
+
 export default connect(
     mapStateToProps,
     { loginUser }

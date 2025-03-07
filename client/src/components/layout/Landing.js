@@ -1,42 +1,32 @@
-import React, { Component } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-class Landing extends Component {
-    render() {
-        return (
-            <div style={{ height: "75vh" }} className="container valign-wrapper">
-                <div className="row">
-                    <div className="col s12 center-align">
-                        <p className="flow-text grey-text text-darken-1">
-                            Create a (minimal) full-stack app with user authentication via
-                            passport and JWTs
-                        </p>
-                        <br />
-                        <div className="col s6">
-                            <Link to="/register"
-                                style={{
-                                    width: "140px",
-                                    borderRadius: "3px",
-                                    letterSpacing: "1.5px"
-                                }}
-                                className="btn btn-large waves-effect waves-light hoverable blue accent-3">
-                                Register
-                            </Link>
-                        </div>
-                        <div className="col s6">
-                            <Link to="/login"
-                                style={{
-                                    width: "140px",
-                                    borderRadius: "3px",
-                                    letterSpacing: "1.5px"
-                                }}
-                                className="btn btn-large btn-flat waves-effect white black-text">
-                                Log In
-                            </Link>
-                        </div>
-                    </div>
+
+const Landing = () => {
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg shadow-xl rounded-3xl p-10 max-w-lg text-center">
+                <h1 className="text-4xl font-bold text-white mb-4 animate-fadeIn">Welcome to Our App 🚀</h1>
+                <p className="text-lg text-gray-200 mb-6">
+                    A minimal full-stack app with user authentication via JWTs.
+                </p>
+                
+                <div className="flex justify-center gap-6">
+                    <Link 
+                        to="/register"
+                        className="px-6 py-3 text-lg font-semibold text-white bg-blue-500 rounded-full shadow-lg transform transition hover:bg-blue-600 hover:scale-105"
+                    >
+                        Register
+                    </Link>
+                    <Link 
+                        to="/login"
+                        className="px-6 py-3 text-lg font-semibold text-gray-900 bg-white rounded-full shadow-lg transform transition hover:bg-gray-200 hover:scale-105"
+                    >
+                        Log In
+                    </Link>
                 </div>
             </div>
-        );
-    }
-}
+        </div>
+    );
+};
+
 export default Landing;

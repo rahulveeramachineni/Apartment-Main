@@ -4,21 +4,20 @@ import { connect } from "react-redux";
 import { logoutUser } from "../../actions/authActions";
 import Navbar from "../partials/Navbar";
 import Sidebar from "../partials/Sidebar";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faList} from "@fortawesome/free-solid-svg-icons/faList";
-import {Link} from "react-router-dom";
-import {faUserAlt} from "@fortawesome/free-solid-svg-icons/faUserAlt";
+import Flats from "./Flats";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faList } from "@fortawesome/free-solid-svg-icons/faList";
 import $ from 'jquery';
 
 class Dashboard extends Component {
-
     constructor() {
         super();
         this.state = {
             isAdmin: false,
             isFlatOwner: false,
             isTenant: false,
-            isEmployee: false
+            isEmployee: false,
+            isOutsider: false  // new role added here
         };
     }
 
@@ -29,175 +28,237 @@ class Dashboard extends Component {
 
     componentDidMount() {
         switch(localStorage.userPermission) {
-            case 'Admin' : 
-                this.setState({ isAdmin : true});
+            case 'Admin': 
+                this.setState({ isAdmin: true });
                 break;
-            case 'FlatOwners' : 
-                this.setState({ isFlatOwner : true});
-                break;   
-            case 'Tenant' : 
-                this.setState({ isTenant : true});
-                break;  
-            case 'Employee' : 
-                this.setState({ isEmployee : true});
-                break;  
+            case 'FlatOwners': 
+                this.setState({ isFlatOwner: true });
+                break;
+            case 'Tenant': 
+                this.setState({ isTenant: true });
+                break;
+            case 'Employee': 
+                this.setState({ isEmployee: true });
+                break;
+            case 'Outsider':   // checking for the Outsider role
+                this.setState({ isOutsider: true });
+                break;
+            default:
+                break;
         }
     }
 
     render() {
-        //const { user } = this.props.auth;
+        // If the user is an outsider, render the Flats component directly
+        if(this.state.isOutsider) {
+            return <Flats />;
+        }
+        
         return (
             <div>
-                <Navbar/>
+                <Navbar />
                 <div className="d-flex" id="wrapper">
-                    <Sidebar isAdmin={this.state.isAdmin} isFlatOwner={this.state.isFlatOwner} isTenant={this.state.isTenant} isEmployee={this.state.isEmployee}/>
+                    <Sidebar 
+                        isAdmin={this.state.isAdmin} 
+                        isFlatOwner={this.state.isFlatOwner} 
+                        isTenant={this.state.isTenant} 
+                        isEmployee={this.state.isEmployee}
+                    />
                     <div id="page-content-wrapper">
                         <div className="container-fluid">
-                            <button className="btn btn-link mt-2" id="menu-toggle"><FontAwesomeIcon icon={faList}/></button>
-                            {this.state.isAdmin && <div>
-                                <div className="row px-2">
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Users</h5>
-                                                <p className="card-text">Create, Edit Delete Users.</p>
-                                                <Link to="/users" className="btn btn-dark"><i class="fa fa-user" aria-hidden="true"></i> Go to Users</Link>
+                            <button className="btn btn-link mt-2" id="menu-toggle">
+                                <FontAwesomeIcon icon={faList} />
+                            </button>
+                            
+                            {this.state.isAdmin && 
+                                <div>
+                                    <div className="row px-2">
+                                        {/* Other admin cards */}
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Users</h5>
+                                                    <p className="card-text">Create, Edit, Delete Users.</p>
+                                                    <a href="/users" className="btn btn-dark">
+                                                        <i className="fa fa-user" aria-hidden="true"></i> Go to Users
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Flat</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Flat.</p>
+                                                    <a href="/flats" className="btn btn-dark">
+                                                        <i className="fa fa-building" aria-hidden="true"></i> Flat Details
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Facility</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Facility.</p>
+                                                    <a href="/facilitys" className="btn btn-dark">
+                                                        <i className="fa fa-gamepad" aria-hidden="true"></i> Facilities
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Employee</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Employee.</p>
+                                                    <a href="/employees" className="btn btn-dark">
+                                                        <i className="fa fa-user" aria-hidden="true"></i> Employee Details
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Flat</h5>
-                                                <p className="card-text">Add, Edit and Delete the Flat.</p>
-                                                <Link to="/flats" className="btn btn-dark"><i class="fa fa-building" aria-hidden="true"></i> Flat Details</Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Facility</h5>
-                                                <p className="card-text">Add, Edit and Delete the Facility.</p>
-                                                <Link to="/facilitys" className="btn btn-dark"><i class="fa fa-gamepad" aria-hidden="true"></i> Facilities</Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Employee</h5>
-                                                <p className="card-text">Add, Edit and Delete the Employee.</p>
-                                                <Link to="/employees" className="btn btn-dark"><i class="fa fa-user" aria-hidden="true"></i> Employee Details</Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="row px-2">
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Tenant</h5>
-                                                <p className="card-text">Add, Edit and Delete the Tenant.</p>
-                                                <Link to="/tenants" className="btn btn-dark"><i class="fa fa-building" aria-hidden="true"></i> Tenant Details</Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>}
-                            {this.state.isFlatOwner && <div>
-                                <div className="row px-2">
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Flat</h5>
-                                                <p className="card-text">Add, Edit and Delete the Flat.</p>
-                                                <Link to="/flats" className="btn btn-dark"><i class="fa fa-building" aria-hidden="true"></i> Flat Details</Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Facility</h5>
-                                                <p className="card-text">Add, Edit and Delete the Facility.</p>
-                                                <Link to="/facilitys" className="btn btn-dark"><i class="fa fa-gamepad" aria-hidden="true"></i> Facilities</Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Employee</h5>
-                                                <p className="card-text">Add, Edit and Delete the Employee.</p>
-                                                <Link to="/employees" className="btn btn-dark"><i class="fa fa-user" aria-hidden="true"></i> Employee Details</Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Tenant</h5>
-                                                <p className="card-text">Add, Edit and Delete the Tenant.</p>
-                                                <Link to="/tenants" className="btn btn-dark"><i class="fa fa-building" aria-hidden="true"></i> Tenant Details</Link>
+                                    <div className="row px-2">
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Tenant</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Tenant.</p>
+                                                    <a href="/tenants" className="btn btn-dark">
+                                                        <i className="fa fa-building" aria-hidden="true"></i> Tenant Details
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>}
-                            {this.state.isTenant && <div>
-                                <div className="row px-2">
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Facility</h5>
-                                                <p className="card-text">Add, Edit and Delete the Facility.</p>
-                                                <Link to="/facilitys" className="btn btn-dark"><i class="fa fa-gamepad" aria-hidden="true"></i> Facilities</Link>
+                            }
+                            
+                            {this.state.isFlatOwner && 
+                                <div>
+                                    <div className="row px-2">
+                                        {/* Flat Owner cards */}
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Flat</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Flat.</p>
+                                                    <a href="/flats" className="btn btn-dark">
+                                                        <i className="fa fa-building" aria-hidden="true"></i> Flat Details
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Employee</h5>
-                                                <p className="card-text">Add, Edit and Delete the Employee.</p>
-                                                <Link to="/employees" className="btn btn-dark"><i class="fa fa-user" aria-hidden="true"></i> Employee Details</Link>
+                                        
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Facility</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Facility.</p>
+                                                    <a href="/facilitys" className="btn btn-dark">
+                                                        <i className="fa fa-gamepad" aria-hidden="true"></i> Facilities
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Tenant</h5>
-                                                <p className="card-text">Add, Edit and Delete the Tenant.</p>
-                                                <Link to="/tenants" className="btn btn-dark"><i class="fa fa-building" aria-hidden="true"></i> Tenant Details</Link>
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Employee</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Employee.</p>
+                                                    <a href="/employees" className="btn btn-dark">
+                                                        <i className="fa fa-user" aria-hidden="true"></i> Employee Details
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Tenant</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Tenant.</p>
+                                                    <a href="/tenants" className="btn btn-dark">
+                                                        <i className="fa fa-building" aria-hidden="true"></i> Tenant Details
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>}
-                            {this.state.isEmployee && <div>
-                                <div className="row px-2">
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Facility</h5>
-                                                <p className="card-text">Add, Edit and Delete the Facility.</p>
-                                                <Link to="/facilitys" className="btn btn-dark"><i class="fa fa-gamepad" aria-hidden="true"></i> Facilities</Link>
+                            }
+                            
+                            {this.state.isTenant && 
+                                <div>
+                                    <div className="row px-2">
+                                        {/* Tenant cards */}
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Facility</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Facility.</p>
+                                                    <a href="/facilitys" className="btn btn-dark">
+                                                        <i className="fa fa-gamepad" aria-hidden="true"></i> Facilities
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="col-sm-3 p-sm-2">
-                                        <div className="card bg-light shadow-lg">
-                                            <div className="card-body">
-                                                <h5 className="card-title">Employee</h5>
-                                                <p className="card-text">Add, Edit and Delete the Employee.</p>
-                                                <Link to="/employees" className="btn btn-dark"><i class="fa fa-user" aria-hidden="true"></i> Employee Details</Link>
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Employee</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Employee.</p>
+                                                    <a href="/employees" className="btn btn-dark">
+                                                        <i className="fa fa-user" aria-hidden="true"></i> Employee Details
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Tenant</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Tenant.</p>
+                                                    <a href="/tenants" className="btn btn-dark">
+                                                        <i className="fa fa-building" aria-hidden="true"></i> Tenant Details
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>}
+                            }
+                            
+                            {this.state.isEmployee && 
+                                <div>
+                                    <div className="row px-2">
+                                        {/* Employee cards */}
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Facility</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Facility.</p>
+                                                    <a href="/facilitys" className="btn btn-dark">
+                                                        <i className="fa fa-gamepad" aria-hidden="true"></i> Facilities
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-3 p-sm-2">
+                                            <div className="card bg-light shadow-lg">
+                                                <div className="card-body">
+                                                    <h5 className="card-title">Employee</h5>
+                                                    <p className="card-text">Add, Edit and Delete the Employee.</p>
+                                                    <a href="/employees" className="btn btn-dark">
+                                                        <i className="fa fa-user" aria-hidden="true"></i> Employee Details
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            
                         </div>
                     </div>
                 </div>

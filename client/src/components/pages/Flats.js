@@ -151,6 +151,10 @@ class Flats extends Component {
     }
 
     render() {
+        // Check if user is Admin or FlatOwners to show the add button.
+        const canAddFlat = localStorage.getItem("userPermission") === "Admin" ||
+                           localStorage.getItem("userPermission") === "FlatOwners";
+
         return (
             <DefaultLayout>
                 <ToastContainer />
@@ -163,7 +167,7 @@ class Flats extends Component {
                             <FontAwesomeIcon icon={faList} />
                         </button>
 
-                        {localStorage.getItem("userPermission") === "Admin" && (
+                        {canAddFlat && (
                             <button className="btn btn-outline-primary float-right mt-3 mr-2" onClick={this.showAddFlatModal}>
                                 <FontAwesomeIcon icon={faPlus} /> Add Flat
                             </button>

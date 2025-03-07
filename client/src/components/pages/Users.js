@@ -22,7 +22,7 @@ class Users extends Component {
             { key: "_id", text: "Id", className: "id", align: "left", sortable: true },
             { key: "name", text: "Name", className: "name", align: "left", sortable: true },
             { key: "email", text: "Email", className: "email", align: "left", sortable: true },
-            { key: "userPermission", text: "Permission", className: "userPermission", align: "left", sortable: true },
+            { key: "userPermission", text: "Role", className: "role", align: "left", sortable: true }, // 🔹 Changed "userPermission" to "role"
             { key: "date", text: "Date", className: "date", align: "left", sortable: true },
             {
                 key: "action",
@@ -72,20 +72,16 @@ class Users extends Component {
         this.getData();
     }
 
-    getData = () => {
+    getData = async () => {
         const token = localStorage.getItem("token");
-        console.log(" ========= ");
-        console.log(token);
-        axios
-            .post("/api/user-data", {}, { headers: { Authorization: `Bearer ${token}` } })
-            .then((res) => {
-                console.log("Updated user list:", res.data);
-                this.setState({ records: res.data });
-            })
-            .catch((error) => {
-                console.error("Error fetching user data:", error);
-                toast.error("Failed to load users.");
-            });
+        try {
+            const res = await axios.post("/api/user-data", {}, { headers: { Authorization: `Bearer ${token}` } });
+            console.log(res);
+            this.setState({ records: res.data });
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+            toast.error("Failed to load users.");
+        }
     };
 
     openEditModal = (record) => {
@@ -106,27 +102,41 @@ class Users extends Component {
         }
     };
 
-    deleteRecord = (record) => {
+    addUser = async (userData) => {
         const token = localStorage.getItem("token");
-        axios
-            .post("/api/user-delete", { _id: record._id }, { headers: { Authorization: `Bearer ${token}` } })
-            .then((res) => {
-                if (res.status === 200) {
-                    toast.success(res.data.message, { position: toast.POSITION.TOP_CENTER });
-                    this.getData();
-                }
-            })
-            .catch((error) => {
-                console.error("Error deleting user:", error);
-                toast.error("Failed to delete user.");
-            });
+        try {
+            await axios.post(
+                "/api/user-add",
+                { ...userData, role: "tenant" }, // 🔹 Ensuring user is always added as a tenant
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success("User added successfully!");
+            this.getData();
+        } catch (error) {
+            console.error("Error adding user:", error);
+            toast.error("Failed to add user.");
+        }
+    };
+
+    deleteRecord = async (record) => {
+        const token = localStorage.getItem("token");
+        try {
+            const res = await axios.post("/api/user-delete", { _id: record._id }, { headers: { Authorization: `Bearer ${token}` } });
+            if (res.status === 200) {
+                toast.success(res.data.message, { position: toast.POSITION.TOP_CENTER });
+                this.getData();
+            }
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            toast.error("Failed to delete user.");
+        }
     };
 
     render() {
         return (
             <DefaultLayout>
                 <ToastContainer />
-                <UserAddModal onSuccess={this.getData} />
+                <UserAddModal onSuccess={this.getData} addUser={this.addUser} /> {/* 🔹 Passed addUser */}
                 <UserUpdateModal record={this.state.currentRecord} metadata={UserMetadata} onSuccess={this.getData} />
                 <div id="page-content-wrapper">
                     <div className="container-fluid">
