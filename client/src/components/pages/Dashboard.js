@@ -7,7 +7,6 @@ import Sidebar from "../partials/Sidebar";
 import Flats from "./Flats";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList } from "@fortawesome/free-solid-svg-icons/faList";
-import $ from 'jquery';
 
 class Dashboard extends Component {
     constructor() {
@@ -17,8 +16,12 @@ class Dashboard extends Component {
             isFlatOwner: false,
             isTenant: false,
             isEmployee: false,
-            isOutsider: false  // new role added here
+            isOutsider: false,
+            isCameraOpen: false,
+            capturedImage: null
         };
+        this.videoRef = React.createRef();
+        this.canvasRef = React.createRef();
     }
 
     onLogoutClick = e => {
@@ -40,7 +43,7 @@ class Dashboard extends Component {
             case 'Employee': 
                 this.setState({ isEmployee: true });
                 break;
-            case 'Outsider':   // checking for the Outsider role
+            case 'Outsider':   
                 this.setState({ isOutsider: true });
                 break;
             default:
@@ -48,20 +51,56 @@ class Dashboard extends Component {
         }
     }
 
+    startCamera = () => {
+        this.setState({ isCameraOpen: true }, () => {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    this.videoRef.current.srcObject = stream;
+                })
+                .catch(err => console.error("Error accessing camera: ", err));
+        });
+    };
+
+    capturePhoto = () => {
+        const canvas = this.canvasRef.current;
+        const video = this.videoRef.current;
+        const context = canvas.getContext("2d");
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const imageDataUrl = canvas.toDataURL("image/png");
+        this.setState({ capturedImage: imageDataUrl });
+
+        // Stop the video stream
+        const stream = video.srcObject;
+        if (stream) {
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+        }
+
+        this.setState({ isCameraOpen: false });
+    };
+
+    retakePhoto = () => {
+        this.setState({ capturedImage: null }, this.startCamera);
+    };
+    
+
     render() {
-        // If the user is an outsider, render the Flats component directly
         if(this.state.isOutsider) {
             return <Flats />;
         }
-        
+
         return (
             <div>
                 <Navbar />
                 <div className="d-flex" id="wrapper">
-                    <Sidebar 
-                        isAdmin={this.state.isAdmin} 
-                        isFlatOwner={this.state.isFlatOwner} 
-                        isTenant={this.state.isTenant} 
+                    <Sidebar
+                        isAdmin={this.state.isAdmin}
+                        isFlatOwner={this.state.isFlatOwner}
+                        isTenant={this.state.isTenant}
                         isEmployee={this.state.isEmployee}
                     />
                     <div id="page-content-wrapper">
@@ -69,8 +108,8 @@ class Dashboard extends Component {
                             <button className="btn btn-link mt-2" id="menu-toggle">
                                 <FontAwesomeIcon icon={faList} />
                             </button>
-                            
-                            {this.state.isAdmin && 
+
+                            {this.state.isAdmin &&
                                 <div>
                                     <div className="row px-2">
                                         {/* Other admin cards */}
@@ -134,8 +173,8 @@ class Dashboard extends Component {
                                     </div>
                                 </div>
                             }
-                            
-                            {this.state.isFlatOwner && 
+
+                            {this.state.isFlatOwner &&
                                 <div>
                                     <div className="row px-2">
                                         {/* Flat Owner cards */}
@@ -150,7 +189,7 @@ class Dashboard extends Component {
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="col-sm-3 p-sm-2">
                                             <div className="card bg-light shadow-lg">
                                                 <div className="card-body">
@@ -187,8 +226,8 @@ class Dashboard extends Component {
                                     </div>
                                 </div>
                             }
-                            
-                            {this.state.isTenant && 
+
+                            {this.state.isTenant &&
                                 <div>
                                     <div className="row px-2">
                                         {/* Tenant cards */}
@@ -228,8 +267,8 @@ class Dashboard extends Component {
                                     </div>
                                 </div>
                             }
-                            
-                            {this.state.isEmployee && 
+
+                            {this.state.isEmployee &&
                                 <div>
                                     <div className="row px-2">
                                         {/* Employee cards */}
@@ -255,10 +294,46 @@ class Dashboard extends Component {
                                                 </div>
                                             </div>
                                         </div>
+                                        <div className="col-sm-3 p-sm-2">
+    <div className="card bg-light shadow-lg">
+        <div className="card-body">
+            <h5 className="card-title">Capture Photo</h5>
+            <p className="card-text">Use camera to capture a photo.</p>
+
+            {!this.state.isCameraOpen && !this.state.capturedImage && (
+                <button className="btn btn-dark" onClick={this.startCamera}>
+                    Open Camera
+                </button>
+            )}
+
+            {this.state.isCameraOpen && (
+                <div>
+                    <video ref={this.videoRef} autoPlay className="w-100"></video>
+                    <button className="btn btn-success mt-2" onClick={this.capturePhoto}>
+                        Capture Photo
+                    </button>
+                </div>
+            )}
+
+            {this.state.capturedImage && (
+                <div>
+                    <img src={this.state.capturedImage} alt="Captured" className="img-fluid mt-2" />
+                    <button className="btn btn-primary mt-2">Upload Photo</button>
+                    <button className="btn btn-warning mt-2 ml-2" onClick={this.retakePhoto}>
+                        Retake Photo
+                    </button>
+                </div>
+            )}
+
+            <canvas ref={this.canvasRef} style={{ display: "none" }}></canvas>
+        </div>
+    </div>
+</div>
+
                                     </div>
                                 </div>
                             }
-                            
+
                         </div>
                     </div>
                 </div>
