@@ -48,6 +48,6 @@ app.get('*', function (req, res) {
 });
 
 // const port = process.env.PORT || 5000;
-const port = 5001;
+const port = 8080;
 
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
